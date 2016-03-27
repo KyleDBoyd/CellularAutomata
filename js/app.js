@@ -52,14 +52,14 @@ for (var i = 0; i < cells.length - 1; i++) {
  */
 function getRule(a, b, c) {
   var val = a + "" + b + "" + c;
-  if (val == "111") return rules[7];
-  if (val == "110") return rules[6];
-  if (val == "101") return rules[5];
-  if (val == "100") return rules[4];
-  if (val == "011") return rules[3];
-  if (val == "010") return rules[2];
-  if (val == "001") return rules[1];
-  if (val == "000") return rules[0];
+  if (val == "111") return rules[0];
+  if (val == "110") return rules[1];
+  if (val == "101") return rules[2];
+  if (val == "100") return rules[3];
+  if (val == "011") return rules[4];
+  if (val == "010") return rules[5];
+  if (val == "001") return rules[6];
+  if (val == "000") return rules[7];
   return 0;
 }
 
