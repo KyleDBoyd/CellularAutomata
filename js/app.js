@@ -1,47 +1,51 @@
-var canvas = document.getElementById('canvas');
-var context = canvas.getContext("2d");
-
-var cellColor = '#000';
-var rules = [0, 1, 0, 1, 1, 0, 1, 0];
 var pixelSize = 10;
+  var rules = [0, 1, 0, 1, 1, 0, 1, 0];
 
-// Init grid
-var grid = renderGrid(pixelSize, 'black');
-var w = grid.columns;
-var h = grid.rows;
+$(document).ready(function() {
+  var canvas = document.getElementById('canvas');
+  var context = canvas.getContext("2d");
+  var cellColor = '#000';
 
-// Init grid array
-var cells = new Array(w);
-for (var i = 0; i < w; i++) {
-  cells[i] = new Array(h);
-}
+  initRulesSelect();
 
-// Set default grid values
-for (var i = 0; i < cells.length; i++) {
-  for (var j = 0; j < cells[i].length; j++) {
-    cells[i][j] = 0;
+  // Init grid
+  var grid = renderGrid(pixelSize, 'black', canvas, context);
+  var w = grid.columns;
+  var h = grid.rows;
+
+  // Init grid array
+  var cells = new Array(w);
+  for (var i = 0; i < w; i++) {
+    cells[i] = new Array(h);
   }
-}
 
-// Init seed
-var middle = Math.round(w/2);
-cells[0][middle] = 1;
-fillCell(middle, 0, cellColor);
-
-// Run through rows executing rules
-for (var i = 0; i < cells.length - 1; i++) {
-  for (var j = 1; j < cells[i].length - 1; j++) {
-    var left = cells[i][j-1];
-    var cur = cells[i][j];
-    var right = cells[i][j+1];
-
-    var val = getRule(left, cur, right);
-    if (val) {
-      cells[i+1][j] = 1;
-      fillCell(j, i+1);
+  // Set default grid values
+  for (var i = 0; i < cells.length; i++) {
+    for (var j = 0; j < cells[i].length; j++) {
+      cells[i][j] = 0;
     }
   }
-}
+
+  // Init seed
+  var middle = Math.round(w/2);
+  cells[0][middle] = 1;
+  fillCell(middle, 0, context);
+
+  // Run through rows executing rules
+  for (var i = 0; i < cells.length - 1; i++) {
+    for (var j = 1; j < cells[i].length - 1; j++) {
+      var left = cells[i][j-1];
+      var cur = cells[i][j];
+      var right = cells[i][j+1];
+
+      var val = getRule(left, cur, right);
+      if (val) {
+        cells[i+1][j] = 1;
+        fillCell(j, i+1, context);
+      }
+    }
+  }
+});
 
 /**
  * Returns the rule result based on the provided a,b,c cell values
@@ -69,7 +73,7 @@ function getRule(a, b, c) {
  * @param {Sting} color
  * @return {Void}
  */
-function renderGrid(gridPixelSize, color)
+function renderGrid(gridPixelSize, color, canvas, context)
 {
     context.save();
     context.lineWidth = 0.5;
@@ -111,7 +115,18 @@ function renderGrid(gridPixelSize, color)
  * @param {Number} i
  * @param {Number} j
  */
-function fillCell(i, j) {
+function fillCell(i, j, context) {
   context.fillRect(i * pixelSize, j * pixelSize, pixelSize, pixelSize);
+
+}
+
+function initRulesSelect() {
+    var x = document.getElementById("rules");
+    for (var i = 0; i < 256; i++) {
+      var option = document.createElement("option");
+      option.text = "Rule" + i;
+      option.value = i;
+      x.add(option);
+    }
 
 }
