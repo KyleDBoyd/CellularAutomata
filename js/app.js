@@ -1,36 +1,46 @@
-var pixelSize = 10;
-  var rules = [0, 1, 0, 1, 1, 0, 1, 0];
+  var pixelSize = 10;
+  var lineWidth = 0.5;
+  var rules = [0, 0, 0, 1, 1, 0, 1, 0];
+  var w, h, cells, context, canvas;
 
 $(document).ready(function() {
-  var canvas = document.getElementById('canvas');
-  var context = canvas.getContext("2d");
+  canvas = document.getElementById('canvas');
+  context = canvas.getContext("2d");
   var cellColor = '#000';
 
+  // Init select and select change listener
   initRulesSelect();
 
   // Init grid
   var grid = renderGrid(pixelSize, 'black', canvas, context);
-  var w = grid.columns;
-  var h = grid.rows;
+  w = grid.columns;
+  h = grid.rows;
+  cells = initCells(context);
 
-  // Init grid array
-  var cells = new Array(w);
-  for (var i = 0; i < w; i++) {
-    cells[i] = new Array(h);
-  }
+  // Init listeners
+  initListeners();
+});
 
-  // Set default grid values
-  for (var i = 0; i < cells.length; i++) {
-    for (var j = 0; j < cells[i].length; j++) {
-      cells[i][j] = 0;
+function initListeners() {
+  $('#rules').on('change', function() {
+    var s = byteString(this.value);
+    var byteArray = s.split("");
+    for (var i=0; i < byteArray.length; i++) {
+      rules[i] = parseInt(byteArray[i]);
     }
-  }
+  });
 
-  // Init seed
-  var middle = Math.round(w/2);
-  cells[0][middle] = 1;
-  fillCell(middle, 0, context);
+  $("#clear").click(function() {
+    resetGrid();
+  });
 
+  $("#execute").click(function() {
+    resetGrid();
+    execute();
+  });
+}
+
+function execute() {
   // Run through rows executing rules
   for (var i = 0; i < cells.length - 1; i++) {
     for (var j = 1; j < cells[i].length - 1; j++) {
@@ -45,7 +55,7 @@ $(document).ready(function() {
       }
     }
   }
-});
+}
 
 /**
  * Returns the rule result based on the provided a,b,c cell values
@@ -76,7 +86,7 @@ function getRule(a, b, c) {
 function renderGrid(gridPixelSize, color, canvas, context)
 {
     context.save();
-    context.lineWidth = 0.5;
+    context.lineWidth = lineWidth;
     context.strokeStyle = color;
 
     var rows = 0;
@@ -111,22 +121,97 @@ function renderGrid(gridPixelSize, color, canvas, context)
 }
 
 /**
+ * Initalize a cells array with the corresponding width and height. Set the
+ * grid seed for the cellular automata
+ *
+ */
+function initCells(context) {
+  // Init grid array
+  var cells = new Array(w);
+  for (var i = 0; i < w; i++) {
+    cells[i] = new Array(h);
+  }
+
+  // Set default grid values
+  for (var i = 0; i < cells.length; i++) {
+    for (var j = 0; j < cells[i].length; j++) {
+      cells[i][j] = 0;
+    }
+  }
+
+  // Init seed
+  var middle = Math.round(w/2);
+  cells[0][middle] = 1;
+  fillCell(middle, 0, context);
+
+  return cells;
+}
+
+function resetGrid() {
+  // Set default grid values
+  for (var i = 0; i < cells.length; i++) {
+    for (var j = 0; j < cells[i].length; j++) {
+      clearCell(i, j, context);
+      cells[i][j] = 0;
+    }
+  }
+
+  // Init seed
+  var middle = Math.round(w/2);
+  cells[0][middle] = 1;
+  fillCell(middle, 0, context);
+
+  return cells;
+}
+
+/**
  * Fills a cell on the 2d grid at the ith jth position
  * @param {Number} i
  * @param {Number} j
  */
 function fillCell(i, j, context) {
-  context.fillRect(i * pixelSize, j * pixelSize, pixelSize, pixelSize);
-
+  context.fillRect(
+    i * pixelSize + lineWidth,
+    j * pixelSize + lineWidth,
+    pixelSize - lineWidth,
+    pixelSize - lineWidth
+  );
 }
 
+/**
+ * Clears a cell on the 2d grid at the ith jth position
+ * @param {Number} i
+ * @param {Number} j
+ */
+function clearCell(i, j, context) {
+  context.clearRect(
+    i * pixelSize + lineWidth,
+    j * pixelSize + lineWidth,
+    pixelSize - lineWidth,
+    pixelSize - lineWidth
+  );
+}
+
+/**
+ * Initialize drop down menu with Elementary Cellular Automata options
+ */
 function initRulesSelect() {
     var x = document.getElementById("rules");
     for (var i = 0; i < 256; i++) {
       var option = document.createElement("option");
-      option.text = "Rule" + i;
+      option.text = "Rule " + i;
       option.value = i;
       x.add(option);
     }
-
 }
+
+/**
+ * Converts a number to a binary digit
+ * @param {Number}
+ */
+ function byteString(n) {
+   if (n < 0 || n > 255 || n % 1 !== 0) {
+       throw new Error(n + " does not fit in a byte");
+   }
+   return ("000000000" + (n >> 0).toString(2)).substr(-8)
+ }
