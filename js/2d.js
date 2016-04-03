@@ -25,6 +25,7 @@ function initListeners() {
   });
 
   $("#execute").click(function() {
+    clearInterval(intervalId);
     intervalId = window.setInterval(execute, 50);
   });
 }
@@ -38,16 +39,16 @@ function execute() {
     for (var j = 0; j < cells[i].length - 1; j++) {
       var neighbours = 0;
       // Top
-      if (cells[i-1][j-1]) neighbours++;
+      if (i != 0 && cells[i-1][j-1]) neighbours++;
       if (cells[i][j-1]) neighbours++;
       if (cells[i+1][j-1]) neighbours++;
 
       // Middle
-      if (cells[i-1][j]) neighbours++;
+      if (i != 0 && cells[i-1][j]) neighbours++;
       if (cells[i+1][j]) neighbours++;
 
       // Bottom
-      if (cells[i-1][j+1]) neighbours++;
+      if (i != 0 && cells[i-1][j+1]) neighbours++;
       if (cells[i][j+1]) neighbours++;
       if (cells[i+1][j+1]) neighbours++;
 
@@ -130,12 +131,14 @@ function initCells(context) {
   }
 
   // Set default grid values
-  for (var i = 1; i < cells.length - 1; i++) {
-    for (var j = 1; j < cells[i].length - 1; j++) {
+  for (var i = 0; i < cells.length - 1; i++) {
+    for (var j = 0; j < cells[i].length - 1; j++) {
       var state = Math.round(Math.random());
       cells[i][j] = state;
       if (state) {
         fillCell(i, j, context);
+      } else {
+        clearCell(i, j, context);
       }
     }
   }
@@ -147,16 +150,17 @@ function initCells(context) {
 * Reset cells grid
 */
 function resetGrid() {
-  curRow = 0;
   clearInterval(intervalId);
 
   // Set default grid values
-  for (var i = 1; i < cells.length - 1; i++) {
-    for (var j = 1; j < cells[i].length - 1; j++) {
-      clearCell(i, j, context);
+  for (var i = 0; i < cells.length - 1; i++) {
+    for (var j = 0; j < cells[i].length - 1; j++) {
       var state = Math.round(Math.random());
+      cells[i][j] = state;
       if (state) {
         fillCell(i, j, context);
+      } else {
+        clearCell(i, j, context);
       }
     }
   }
