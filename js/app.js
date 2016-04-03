@@ -1,7 +1,8 @@
   var pixelSize = 10;
   var lineWidth = 0.5;
-  var rules = [0, 0, 0, 1, 1, 0, 1, 0];
-  var w, h, cells, context, canvas;
+  var rules = [0, 0, 0, 0, 0, 0, 0, 0];
+  var w, h, cells, context, canvas, intervalId;
+  var curRow = 0;
 
 $(document).ready(function() {
   canvas = document.getElementById('canvas');
@@ -41,20 +42,27 @@ function initListeners() {
 }
 
 function execute() {
-  // Run through rows executing rules
-  for (var i = 0; i < cells.length - 1; i++) {
-    for (var j = 1; j < cells[i].length - 1; j++) {
-      var left = cells[i][j-1];
-      var cur = cells[i][j];
-      var right = cells[i][j+1];
+  intervalId = window.setInterval(executeRow, 100);
+}
 
-      var val = getRule(left, cur, right);
-      if (val) {
-        cells[i+1][j] = 1;
-        fillCell(j, i+1, context);
-      }
+function executeRow() {
+  if (curRow == cells.length - 1) {
+    clearInterval(intervalId);
+    return;
+  }
+
+  for (var j = 1; j < cells[curRow].length - 1; j++) {
+    var left = cells[curRow][j-1];
+    var cur = cells[curRow][j];
+    var right = cells[curRow][j+1];
+
+    var val = getRule(left, cur, right);
+    if (val) {
+      cells[curRow+1][j] = 1;
+      fillCell(j, curRow+1, context);
     }
   }
+  curRow++;
 }
 
 /**
@@ -147,7 +155,12 @@ function initCells(context) {
   return cells;
 }
 
+/**
+ * Reset cells grid
+ */
 function resetGrid() {
+  curRow = 0;
+
   // Set default grid values
   for (var i = 0; i < cells.length; i++) {
     for (var j = 0; j < cells[i].length; j++) {
